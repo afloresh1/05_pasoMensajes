@@ -22,7 +22,7 @@ int main()
     int msqid;
     key_t key;
     message_buf rbuf, sbuf;
-    size_t buf_length;
+    size_t buf_length;////////////////
 
     key = 1234;
     // Este metodo trata de acceder a una cola de mensaje con llave 1234
@@ -32,7 +32,9 @@ int main()
         perror("msgget");
         exit(1);
     }
-    // Esta es una llamada BLOQUEANTE sobre la cola de mensajes con identificador
+
+
+   // Esta es una llamada BLOQUEANTE sobre la cola de mensajes con identificador
     // msqid. El mensaje se almacenara en la variable rbuf y se leera un total de
     // MSGSZ bytes. El mensaje sera de tipo 1.
     if (msgrcv(msqid, &rbuf, MSGSZ, 1, 0) < 0)
@@ -41,6 +43,27 @@ int main()
         exit(1);
     }
     printf("%s\n", rbuf.mtext);
+    
+    sbuf.mtype = 2;
+    strcpy(sbuf.mtext, "Loud and clear");
+    if (msgsnd(msqid, &sbuf, strlen(sbuf.mtext) + 1, 0) < 0)
+    {
+        perror("msgsnd");
+        exit(1);
+    }
+
+    if (msgrcv(msqid, &rbuf, MSGSZ, 3, 0) < 0)
+    {
+        perror("msgrcv");
+        exit(1);
+    }
+    printf("message_send: %s\n", rbuf.mtext);
+
     exit(0);
+
+
+
+
+
 }
 
