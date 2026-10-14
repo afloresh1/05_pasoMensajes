@@ -1,21 +1,11 @@
-/*
-Compile este programa asi
-
-gcc message_send.c -o send
-*/
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #define MSGSZ 128
 
-/**
-Esta estructura define los elementos que tiene un mensaje
-*/
 typedef struct msgbuf
 {
     long mtype;
@@ -25,19 +15,12 @@ typedef struct msgbuf
 int main()
 {
     int msqid;
-    // En este programa el que envia el mensaje es el que crea
-    // la cola.
     int msgflg = IPC_CREAT | 0666;
     key_t key;
     message_buf sbuf;
     message_buf rbuf;
     size_t buf_length;
-
     key = 1234;
-
-    // Invocar a la funcion msgget() con el msgflg con valor IPC_CREAT | 0666
-    // provoca que se cree la cola si esta ya no existe. Si existe, se devuelve
-    // en msqid el identificador de la cola con llave '1234'.
     if ((msqid = msgget(key, msgflg)) < 0)
     {
         perror("msgget()");
@@ -54,6 +37,21 @@ int main()
         perror("msgsnd");
         exit(1);
     }
-    exit(0);
-}
 
+    if (msgrcv(msqid, &rbuf, MSGSZ, 2, 0) < 0)
+    {
+        perror("msgrcv");
+        exit(1);
+    }
+    printf("message_rec: %s\n", rbuf.mtext);
+
+    sbuf.mtype = 3;
+    strcpy(sbuf.mtext, "I can hear you too");
+    if (msgsnd(msqid, &sbuf, strlen(sbuf.mtext) + 1, 0) < 0)
+    {
+        perror("msgsnd");
+        exit(1);
+    }
+
+   exit(0);
+}
